@@ -1,7 +1,9 @@
-package com.daviprojetos.instagram;
+package com.daviprojetos.instagram.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+
+import com.daviprojetos.instagram.R;
 
 public class MainActivity extends AppCompatActivity {
 
