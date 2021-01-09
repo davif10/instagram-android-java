@@ -9,7 +9,8 @@
     <color name="white">#FFFFFFFF</color>
     <color name="colorPrimary">@android:color/white</color>
     <color name="colorPrimaryDark">#462759</color>
-    <color name="cinza_medio">#DBDBDB</color>
+    <color name="cinza_medio">#ebebeb</color>
     <color name="roxo">#462759</color>
-    <color name="colorAccent">#E91E63</color>
+    <color name="azulEscuro">#3f51b5</color>
+    <color name="colorAccent">#a03d89</color>
 </resources>
