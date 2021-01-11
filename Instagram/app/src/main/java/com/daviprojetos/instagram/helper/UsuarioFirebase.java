@@ -4,6 +4,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.daviprojetos.instagram.model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -39,5 +40,22 @@ public class UsuarioFirebase {
         }catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    public static Usuario getDadosUsuarioLogado(){
+        FirebaseUser firebaseUser = getUsuarioAtual();
+        Usuario usuario = new Usuario();
+        usuario.setEmail(firebaseUser.getEmail());
+        usuario.setNome(firebaseUser.getDisplayName());
+        usuario.setId(firebaseUser.getUid());
+
+        if(firebaseUser.getPhotoUrl() == null){
+            usuario.setCaminhoFoto("");
+
+        }else{
+                usuario.setCaminhoFoto(firebaseUser.getPhotoUrl().toString());
+        }
+
+        return usuario;
     }
 }
