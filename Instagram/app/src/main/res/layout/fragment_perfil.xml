@@ -133,7 +133,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/buttonEditarPerfil"
+        android:id="@+id/buttonAcaoPerfil"
         android:layout_width="0dp"
         android:layout_height="21dp"
         android:layout_marginTop="16dp"
@@ -157,7 +157,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonEditarPerfil" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonAcaoPerfil" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline3"
