@@ -68,8 +68,8 @@ public class EditarPerfilActivity extends AppCompatActivity {
         FirebaseUser usuarioPerfil = UsuarioFirebase.getUsuarioAtual();
         editNomePerfil.setText(usuarioPerfil.getDisplayName().toUpperCase());
         editEmailPerfil.setText(usuarioPerfil.getEmail());
-        Uri url = usuarioPerfil.getPhotoUrl();
 
+        Uri url = usuarioPerfil.getPhotoUrl();
         if(url != null){
             Glide.with(EditarPerfilActivity.this)
                     .load(url)
