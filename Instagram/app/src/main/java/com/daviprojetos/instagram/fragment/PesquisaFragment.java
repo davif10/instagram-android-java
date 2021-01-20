@@ -20,6 +20,7 @@ import com.daviprojetos.instagram.activity.PerfilAmigoActivity;
 import com.daviprojetos.instagram.adapter.AdapterPesquisa;
 import com.daviprojetos.instagram.helper.ConfiguracaoFirebase;
 import com.daviprojetos.instagram.helper.RecyclerItemClickListener;
+import com.daviprojetos.instagram.helper.UsuarioFirebase;
 import com.daviprojetos.instagram.model.Usuario;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -36,6 +37,7 @@ public class PesquisaFragment extends Fragment {
     private List<Usuario>listaUsuarios;
     private DatabaseReference usuariosRef;
     private AdapterPesquisa adapterPesquisa;
+    private String idUsuarioLogado;
 
     public PesquisaFragment() {
     }
@@ -49,6 +51,7 @@ public class PesquisaFragment extends Fragment {
         recyclerPesquisa = view.findViewById(R.id.recyclerPesquisa);
 
         //Configurações iniciais
+        idUsuarioLogado = UsuarioFirebase.getIdentificadorUsuario();
         listaUsuarios = new ArrayList<>();
         usuariosRef = ConfiguracaoFirebase.getFirebase()
                 .child("usuarios");
@@ -117,6 +120,12 @@ public class PesquisaFragment extends Fragment {
                     listaUsuarios.clear();
                     for(DataSnapshot ds: dataSnapshot.getChildren()){
 
+                        //Verifica se é usuário logado e remove da lista
+                        Usuario usuario = ds.getValue(Usuario.class);
+                        if(idUsuarioLogado.equals(usuario.getId()))
+                            continue;
+
+                        //Adiciona usuário na lista
                         listaUsuarios.add(ds.getValue(Usuario.class));
                     }
 
