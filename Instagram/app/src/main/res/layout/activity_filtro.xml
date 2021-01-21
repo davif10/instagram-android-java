@@ -6,18 +6,16 @@
     android:layout_height="wrap_content"
     android:fillViewport="true"
     tools:context=".activity.FiltroActivity">
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
-
         <include layout="@layout/toobar" />
 
         <ImageView
             android:id="@+id/imageFotoEscolhida"
             android:layout_width="match_parent"
-            android:layout_height="420dp"
+            android:layout_height="320dp"
             android:scaleType="centerCrop"
             app:srcCompat="@drawable/avatar" />
 
