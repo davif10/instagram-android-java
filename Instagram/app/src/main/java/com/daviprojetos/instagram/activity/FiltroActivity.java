@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import com.daviprojetos.instagram.R;
 import com.daviprojetos.instagram.adapter.AdapterMiniaturas;
 import com.daviprojetos.instagram.helper.RecyclerItemClickListener;
+import com.daviprojetos.instagram.model.Postagem;
 import com.zomato.photofilters.FilterPack;
 import com.zomato.photofilters.imageprocessors.Filter;
 import com.zomato.photofilters.utils.ThumbnailItem;
@@ -39,6 +40,7 @@ public class FiltroActivity extends AppCompatActivity {
     private List<ThumbnailItem>listaFiltros;
     private RecyclerView recyclerFiltros;
     private AdapterMiniaturas adapterMiniaturas;
+    private String idUsuarioLogado;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +126,11 @@ public class FiltroActivity extends AppCompatActivity {
         adapterMiniaturas.notifyDataSetChanged();
     }
 
+    private void publicarPostagem(){
+        Postagem postagem = new Postagem();
+        postagem.setIdUsuario(idUsuarioLogado);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -135,7 +142,7 @@ public class FiltroActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
             case R.id.ic_salvar_postagem :
-
+                    publicarPostagem();
                 break;
         }
         return super.onOptionsItemSelected(item);
