@@ -1,5 +1,8 @@
 package com.daviprojetos.instagram.model;
 
+import com.daviprojetos.instagram.helper.ConfiguracaoFirebase;
+import com.google.firebase.database.DatabaseReference;
+
 public class Postagem {
     /*
     *Modelo de postagem
@@ -16,6 +19,20 @@ public class Postagem {
     private String caminhoFoto;
 
     public Postagem() {
+
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebase();
+        DatabaseReference postagemref = firebaseRef.child("postagens");
+        String idPostagem = postagemref.push().getKey();
+        setId(idPostagem);
+    }
+
+    public boolean salvar(){
+        DatabaseReference firebaseref = ConfiguracaoFirebase.getFirebase();
+        DatabaseReference postagensRef = firebaseref.child("postagens")
+                .child(getIdUsuario())
+                .child(getId());
+        postagensRef.setValue(this);
+        return true;
     }
 
     public String getId() {
