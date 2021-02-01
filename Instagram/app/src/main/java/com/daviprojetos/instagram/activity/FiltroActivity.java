@@ -1,6 +1,7 @@
 package com.daviprojetos.instagram.activity;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -47,8 +48,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FiltroActivity extends AppCompatActivity {
-    static
-    {
+    static {
         System.loadLibrary("NativeImageProcessor");
     }
 
@@ -56,13 +56,12 @@ public class FiltroActivity extends AppCompatActivity {
     private Bitmap imagem;
     private Bitmap imagemFiltro;
     private TextInputEditText textDescricaoFiltro;
-    private List<ThumbnailItem>listaFiltros;
+    private List<ThumbnailItem> listaFiltros;
     private RecyclerView recyclerFiltros;
     private AdapterMiniaturas adapterMiniaturas;
     private String idUsuarioLogado;
     private Usuario usuarioLogado;
-    private ProgressBar progressBar;
-    private boolean estaCarregando;
+    private AlertDialog dialog;
 
     private DatabaseReference usuariosRef;
     private DatabaseReference usuarioLogadoRef;
@@ -81,7 +80,6 @@ public class FiltroActivity extends AppCompatActivity {
         imageFotoEscolhida = findViewById(R.id.imageFotoEscolhida);
         recyclerFiltros = findViewById(R.id.recyclerFiltros);
         textDescricaoFiltro = findViewById(R.id.textDescricaoFiltro);
-        progressBar = findViewById(R.id.progressFiltro);
 
         //Recuperar dados do usuário Logado
         recuperarDadosUsuarioLogado();
@@ -95,15 +93,15 @@ public class FiltroActivity extends AppCompatActivity {
 
         //Recupera a imagem escolhida pelo usuário
         Bundle bundle = getIntent().getExtras();
-        if(bundle!= null){
+        if (bundle != null) {
             byte[] dadosImagem = bundle.getByteArray("fotoEscolhida");
-            imagem = BitmapFactory.decodeByteArray(dadosImagem,0,dadosImagem.length);
+            imagem = BitmapFactory.decodeByteArray(dadosImagem, 0, dadosImagem.length);
             imageFotoEscolhida.setImageBitmap(imagem);
-            imagemFiltro = imagem.copy(imagem.getConfig(),true);
+            imagemFiltro = imagem.copy(imagem.getConfig(), true);
 
             //Configuração do RecyclerView de filtros
-            adapterMiniaturas = new AdapterMiniaturas(listaFiltros,getApplicationContext());
-            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false);
+            adapterMiniaturas = new AdapterMiniaturas(listaFiltros, getApplicationContext());
+            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
             recyclerFiltros.setLayoutManager(layoutManager);
             recyclerFiltros.setAdapter(adapterMiniaturas);
             //Adiciona evento de clique no recyclerView
@@ -114,7 +112,7 @@ public class FiltroActivity extends AppCompatActivity {
                         @Override
                         public void onItemClick(View view, int position) {
                             ThumbnailItem item = listaFiltros.get(position);
-                            imagemFiltro = imagem.copy(imagem.getConfig(),true);
+                            imagemFiltro = imagem.copy(imagem.getConfig(), true);
                             Filter filtro = item.filter;
                             imageFotoEscolhida.setImageBitmap(filtro.processFilter(imagemFiltro));
                         }
@@ -137,25 +135,25 @@ public class FiltroActivity extends AppCompatActivity {
         }
     }
 
-    private void carregando(boolean estado){
-        if(estado){
-            estaCarregando = true;
-            progressBar.setVisibility(View.VISIBLE);
-        }else{
-            estaCarregando = false;
-            progressBar.setVisibility(View.GONE);
-        }
+    private void abrirDialogCarregamento(String titulo){
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setTitle(titulo);
+        alert.setCancelable(false);
+        alert.setView(R.layout.carregamento);
+
+        dialog = alert.create();
+        dialog.show();
     }
 
     private void recuperarDadosUsuarioLogado() {
-        carregando(true);
+        abrirDialogCarregamento("Carregando dados, aguarde!");
         usuarioLogadoRef = usuariosRef.child(idUsuarioLogado);
         usuarioLogadoRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 //Recupera dados de usuário logado
                 usuarioLogado = dataSnapshot.getValue(Usuario.class);
-                carregando(false);
+                dialog.cancel();
             }
 
             @Override
@@ -166,7 +164,7 @@ public class FiltroActivity extends AppCompatActivity {
     }
 
 
-    private void recuperarFiltros(){
+    private void recuperarFiltros() {
 
         //Limpar itens
         ThumbnailsManager.clearThumbs();
@@ -178,8 +176,8 @@ public class FiltroActivity extends AppCompatActivity {
         ThumbnailsManager.addThumb(item);
 
         //Lista todos os filtros
-        List<Filter>filtros = FilterPack.getFilterPack(getApplicationContext());
-        for(Filter filtro: filtros){
+        List<Filter> filtros = FilterPack.getFilterPack(getApplicationContext());
+        for (Filter filtro : filtros) {
             ThumbnailItem itemFiltro = new ThumbnailItem();
             itemFiltro.image = imagem;
             itemFiltro.filter = filtro;
@@ -190,74 +188,72 @@ public class FiltroActivity extends AppCompatActivity {
         adapterMiniaturas.notifyDataSetChanged();
     }
 
-    private void publicarPostagem(){
-        if(estaCarregando){
-            Toast.makeText(this, "Carregando dados, aguarde!", Toast.LENGTH_SHORT).show();
-        }else{
-            final Postagem postagem = new Postagem();
-            postagem.setIdUsuario(idUsuarioLogado);
-            postagem.setDescricao(textDescricaoFiltro.getText().toString());
-            //Recuperar dados da imagem para o firebase
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            imagemFiltro.compress(Bitmap.CompressFormat.JPEG,70,baos);
-            byte[] dadosImagem = baos.toByteArray();
+    private void publicarPostagem() {
+        abrirDialogCarregamento("Salvando Postagem");
+        final Postagem postagem = new Postagem();
+        postagem.setIdUsuario(idUsuarioLogado);
+        postagem.setDescricao(textDescricaoFiltro.getText().toString());
+        //Recuperar dados da imagem para o firebase
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        imagemFiltro.compress(Bitmap.CompressFormat.JPEG, 70, baos);
+        byte[] dadosImagem = baos.toByteArray();
 
-            //Salvar a imagem no Firebase Storage
-            StorageReference storageRef = ConfiguracaoFirebase.getFirebaseStorage();
-            final StorageReference imagemRef = storageRef
-                    .child("imagens")
-                    .child("postagens")
-                    .child(idUsuarioLogado)
-                    .child(postagem.getId()+".jpeg");
+        //Salvar a imagem no Firebase Storage
+        StorageReference storageRef = ConfiguracaoFirebase.getFirebaseStorage();
+        final StorageReference imagemRef = storageRef
+                .child("imagens")
+                .child("postagens")
+                .child(idUsuarioLogado)
+                .child(postagem.getId() + ".jpeg");
 
-            UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
-            uploadTask.addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(FiltroActivity.this, "Erro ao salvar a imagem, tente novamente!", Toast.LENGTH_SHORT).show();
-                }
-            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    //Recuperar local da foto
-                    imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Uri> task) {
-                            Uri url = task.getResult();
-                            postagem.setCaminhoFoto(url.toString());
+        UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(FiltroActivity.this, "Erro ao salvar a imagem, tente novamente!", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                //Recuperar local da foto
+                imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Uri> task) {
+                        Uri url = task.getResult();
+                        postagem.setCaminhoFoto(url.toString());
 
-                            //Salvar postagem
-                            if(postagem.salvar()){
+                        //Salvar postagem
+                        if (postagem.salvar()) {
 
-                                //Atualizar a quantidade de postagens
-                                int qtdPostagem = usuarioLogado.getPostagens() + 1;
-                                usuarioLogado.setPostagens(qtdPostagem);
-                                usuarioLogado.atualizarQtdPostagem();
-                                Toast.makeText(FiltroActivity.this, "Sucesso ao salvar postagem!", Toast.LENGTH_SHORT).show();
-                                finish();
-                            }
-
+                            //Atualizar a quantidade de postagens
+                            int qtdPostagem = usuarioLogado.getPostagens() + 1;
+                            usuarioLogado.setPostagens(qtdPostagem);
+                            usuarioLogado.atualizarQtdPostagem();
+                            Toast.makeText(FiltroActivity.this, "Sucesso ao salvar postagem!", Toast.LENGTH_SHORT).show();
+                            dialog.cancel();
+                            finish();
                         }
-                    });
 
-                }
-            });
-        }
+                    }
+                });
+
+            }
+        });
 
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_filtro,menu);
+        inflater.inflate(R.menu.menu_filtro, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.ic_salvar_postagem :
-                    publicarPostagem();
+        switch (item.getItemId()) {
+            case R.id.ic_salvar_postagem:
+                publicarPostagem();
                 break;
         }
         return super.onOptionsItemSelected(item);
