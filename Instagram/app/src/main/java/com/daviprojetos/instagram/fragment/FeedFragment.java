@@ -60,6 +60,8 @@ public class FeedFragment extends Fragment {
     }
 
     private void listarFeed(){
+        //Limpar a lista
+        listaFeed.clear();
         valueEventListenerFeed = feedRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -81,6 +83,12 @@ public class FeedFragment extends Fragment {
     public void onStart() {
         super.onStart();
         listarFeed();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
     }
 
     @Override

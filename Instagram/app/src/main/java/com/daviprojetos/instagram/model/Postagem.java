@@ -41,6 +41,9 @@ public class Postagem implements Serializable {
         String combinacaoId = "/"+getIdUsuario() + "/"+getId();
         objeto.put("/postagens" + combinacaoId, this);
 
+        //Referencia do objeto para salvar
+        HashMap<String, Object> dadosSeguidor = new HashMap<>();
+
         //Referência para postagem
        for(DataSnapshot seguidores: seguidoresSnapshot.getChildren()){
             /*
@@ -52,7 +55,6 @@ public class Postagem implements Serializable {
 
            String idSeguidor = seguidores.getKey();
            //Monta objeto para salvar
-           HashMap<String, Object> dadosSeguidor = new HashMap<>();
            dadosSeguidor.put("fotoPostagem",getCaminhoFoto());
            dadosSeguidor.put("descricao",getDescricao());
            dadosSeguidor.put("id",getId());
@@ -64,8 +66,12 @@ public class Postagem implements Serializable {
            objeto.put("/feed" + idsAtualizacao, dadosSeguidor);
 
        }
+        String idAtualizacaoUsuarioLogado = "/" + getIdUsuario() + "/"+getId();
+        objeto.put("/feed" + idAtualizacaoUsuarioLogado, dadosSeguidor);
+
 
         firebaseRef.updateChildren(objeto);
+
         return true;
     }
 
