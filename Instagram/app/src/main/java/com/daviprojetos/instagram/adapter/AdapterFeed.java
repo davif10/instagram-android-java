@@ -1,6 +1,7 @@
 package com.daviprojetos.instagram.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.daviprojetos.instagram.R;
+import com.daviprojetos.instagram.activity.ComentariosActivity;
 import com.daviprojetos.instagram.helper.ConfiguracaoFirebase;
 import com.daviprojetos.instagram.helper.UsuarioFirebase;
 import com.daviprojetos.instagram.model.Feed;
@@ -59,6 +61,16 @@ public class AdapterFeed extends RecyclerView.Adapter<AdapterFeed.MyViewHolder> 
         holder.descricao.setText(feed.getDescricao());
         holder.nome.setText(feed.getNomeUsuario());
 
+        //Adicionar evento de clique nos comentários
+        holder.visualizarComentario.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(context, ComentariosActivity.class);
+                i.putExtra("idPostagem",feed.getId());
+                context.startActivity(i);
+            }
+        });
+
         /*
           +id_postagem
             +qtdCurtidas
@@ -79,6 +91,13 @@ public class AdapterFeed extends RecyclerView.Adapter<AdapterFeed.MyViewHolder> 
                     qtdCurtidas = postagemCurtida.getQtdCurtidas();
                 }
 
+                //Verifica se já foi clicado
+                if(dataSnapshot.hasChild(usuarioLogado.getId())){
+                    holder.likeButton.setLiked(true);
+                }else{
+                    holder.likeButton.setLiked(false);
+                }
+
                 //Monta objeto postagem curtida
                 PostagemCurtida curtida = new PostagemCurtida();
                 curtida.setFeed(feed);
@@ -90,13 +109,17 @@ public class AdapterFeed extends RecyclerView.Adapter<AdapterFeed.MyViewHolder> 
                     @Override
                     public void liked(LikeButton likeButton) {
                         curtida.salvar();
+                        holder.qtdCurtidas.setText(curtida.getQtdCurtidas() + " curtidas");
                     }
 
                     @Override
                     public void unLiked(LikeButton likeButton) {
-
+                        curtida.remover();
+                        holder.qtdCurtidas.setText(curtida.getQtdCurtidas() + " curtidas");
                     }
                 });
+
+                holder.qtdCurtidas.setText(curtida.getQtdCurtidas() + " curtidas");
 
             }
 
