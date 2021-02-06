@@ -9,6 +9,7 @@ public class PostagemCurtida {
     private int qtdCurtidas = 0;
     private Feed feed;
     private Usuario usuario;
+    private Postagem postagem;
 
     public PostagemCurtida() {
     }
@@ -39,10 +40,47 @@ public class PostagemCurtida {
         //Atualizar quantidade de curtidas
         atualizarQtd(-1);
     }
+
     public void atualizarQtd(int valor){
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebase();
         DatabaseReference pCurtidasRef = firebaseRef.child("postagens-curtidas")
                 .child(feed.getId())//Id_postagem
+                .child("qtdCurtidas");
+        setQtdCurtidas(getQtdCurtidas() + valor);
+        pCurtidasRef.setValue(getQtdCurtidas());
+    }
+
+    public void salvarCurtidaNoVisualizarPostagem(){
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebase();
+        //Objeto usuario
+        HashMap<String, Object> dadosUsuario = new HashMap<>();
+        dadosUsuario.put("nomeUsuario",usuario.getNome());
+        dadosUsuario.put("caminhoFoto",usuario.getCaminhoFoto());
+
+        DatabaseReference pCurtidasRef = firebaseRef.child("postagens-curtidas")
+                .child(postagem.getId())//Id_postagem
+                .child(usuario.getId());//id_usuario_logado
+        pCurtidasRef.setValue(dadosUsuario);
+
+        //Atualizar quantidade de curtidas
+        atualizarQtdCurtidaNoVisualizarPostagem(1);
+    }
+
+    public void removerCurtidaNoVisualizarPostagem(){
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebase();
+        DatabaseReference pCurtidasRef = firebaseRef.child("postagens-curtidas")
+                .child(postagem.getId())//Id_postagem
+                .child(usuario.getId());//id_usuario_logado
+        pCurtidasRef.removeValue();
+
+        //Atualizar quantidade de curtidas
+        atualizarQtdCurtidaNoVisualizarPostagem(-1);
+    }
+
+    public void atualizarQtdCurtidaNoVisualizarPostagem(int valor){
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebase();
+        DatabaseReference pCurtidasRef = firebaseRef.child("postagens-curtidas")
+                .child(postagem.getId())//Id_postagem
                 .child("qtdCurtidas");
         setQtdCurtidas(getQtdCurtidas() + valor);
         pCurtidasRef.setValue(getQtdCurtidas());
@@ -70,5 +108,13 @@ public class PostagemCurtida {
 
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
+    }
+
+    public Postagem getPostagem() {
+        return postagem;
+    }
+
+    public void setPostagem(Postagem postagem) {
+        this.postagem = postagem;
     }
 }
